@@ -1,0 +1,10 @@
+datasource.driver_class_name: com.mysql.cj.jdbc.Driver
+datasource.url: jdbc:mysql://localhost/Ip-Info-Storage
+datasource.username: root
+datasource.password: root
+datasource.properties.useSSL: false
+task.ipprocessing.fixedDelay.inMiliseconds: 2
+task.ipprocessing.initialDelay.inMiliseconds: 1000
+processing.batchLimit: 100
+processing.apiRateLimit: 50.0
+processing.ipCountryInfoApiUrl: https://api.ip2country.info/ip?
