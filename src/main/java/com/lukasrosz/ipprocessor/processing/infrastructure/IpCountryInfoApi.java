@@ -12,7 +12,7 @@ import java.util.Optional;
 @Slf4j
 public class IpCountryInfoApi implements CountryInfoRepository {
 
-    private final String API_URL;
+    private final String apiUrl;
 
     public Optional<IpCountryInfo> getIpCountryInfo(String ipAddress) {
         RestTemplate restTemplate = new RestTemplate();
@@ -29,7 +29,7 @@ public class IpCountryInfoApi implements CountryInfoRepository {
     }
 
     private String getUrlForIp(String ipAddress) {
-        return API_URL + ipAddress;
+        return apiUrl + ipAddress;
     }
 
 

@@ -20,16 +20,16 @@ public class AddressProcessor {
 
     private final AddressService addressService;
     private final IpCountryInfoApi ipCountryInfoApi;
-    private final int BATCH_LIMIT;
+    private final int batchLimit;
     private final RateLimiter rateLimiter;
 
     public void processAddresses() {
-        List<UnprocessedAddress> unprocessedAddresses = addressService.getUnprocessedAddresses(BATCH_LIMIT);
-        while (unprocessedAddresses.size() > 0) {
+        List<UnprocessedAddress> unprocessedAddresses = addressService.getUnprocessedAddresses(batchLimit);
+        while (!unprocessedAddresses.isEmpty()) {
             Queue<ProcessedAddress> processedAddresses = new ConcurrentLinkedQueue<>();
             populateProcessedAddressesQueue(unprocessedAddresses, processedAddresses);
             addressService.update(processedAddresses);
-            unprocessedAddresses = addressService.getUnprocessedAddresses(BATCH_LIMIT);
+            unprocessedAddresses = addressService.getUnprocessedAddresses(batchLimit);
         }
     }
 
