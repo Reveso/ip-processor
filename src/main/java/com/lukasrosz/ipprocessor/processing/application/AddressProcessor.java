@@ -2,8 +2,8 @@ package com.lukasrosz.ipprocessor.processing.application;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.lukasrosz.ipprocessor.processing.infrastructure.IpCountryInfoApi;
+import com.lukasrosz.ipprocessor.processing.model.Address;
 import com.lukasrosz.ipprocessor.processing.model.AddressCountryDetails;
-import com.lukasrosz.ipprocessor.processing.model.ProcessedAddress;
 import com.lukasrosz.ipprocessor.processing.model.UnprocessedAddress;
 import com.lukasrosz.ipprocessor.processing.model.external.IpCountryInfo;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class AddressProcessor {
     public void processAddresses() {
         List<UnprocessedAddress> unprocessedAddresses = addressService.getUnprocessedAddresses(batchLimit);
         while (!unprocessedAddresses.isEmpty()) {
-            Queue<ProcessedAddress> processedAddresses = new ConcurrentLinkedQueue<>();
+            Queue<Address> processedAddresses = new ConcurrentLinkedQueue<>();
             populateProcessedAddressesQueue(unprocessedAddresses, processedAddresses);
             addressService.update(processedAddresses);
             unprocessedAddresses = addressService.getUnprocessedAddresses(batchLimit);
@@ -34,20 +34,23 @@ public class AddressProcessor {
     }
 
     private void populateProcessedAddressesQueue(List<UnprocessedAddress> unprocessedAddresses,
-                                                 Queue<ProcessedAddress> processedAddresses) {
+                                                 Queue<Address> addressesForUpdate) {
         unprocessedAddresses.parallelStream().forEach(unprocessedAddress -> {
             rateLimiter.acquire();
-            ipCountryInfoApi.getIpCountryInfo(unprocessedAddress.getAddress()).ifPresent(ipCountryInfo -> {
-                        try {
-                            val processedAddress = unprocessedAddress.process(fromIpCountryInfo(ipCountryInfo));
-                            log.info("Adding to update list: {}", processedAddress);
-                            processedAddresses.add(processedAddress);
-                        } catch (IllegalArgumentException | NullPointerException exception) {
-                            log.warn("Failed to get country details for address {}, reason {}",
-                                    unprocessedAddress.getAddress().getHostName(), exception);
-                        }
-                    }
-            );
+            ipCountryInfoApi.getIpCountryInfo(unprocessedAddress.getAddress())
+                    .ifPresent(ipCountryInfo -> {
+                                try {
+                                    AddressCountryDetails countryDetails = fromIpCountryInfo(ipCountryInfo);
+                                    val processedAddress = unprocessedAddress.process(countryDetails);
+                                    addressesForUpdate.add(processedAddress);
+                                    log.info("Processed address: {}", processedAddress);
+                                } catch (IllegalArgumentException | NullPointerException exception) {
+                                    addressesForUpdate.add(unprocessedAddress.notFound());
+                                    log.warn("Failed to get country details for address {}, reason {}",
+                                            unprocessedAddress.getAddress().getHostName(), exception.getCause());
+                                }
+                            }
+                    );
         });
     }
 

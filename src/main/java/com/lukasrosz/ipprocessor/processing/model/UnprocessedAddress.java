@@ -10,7 +10,7 @@ import java.util.Date;
 
 @ToString
 @Value
-public class UnprocessedAddress {
+public class UnprocessedAddress implements Address {
     Long id;
     InetAddress address;
 
@@ -24,6 +24,14 @@ public class UnprocessedAddress {
                 .id(this.id)
                 .address(this.address)
                 .countryDetails(countryDetails)
+                .processedDate(new Timestamp(new Date().getTime()))
+                .build();
+    }
+
+    public NotFoundAddress notFound() {
+        return NotFoundAddress.builder()
+                .id(this.id)
+                .address(address)
                 .processedDate(new Timestamp(new Date().getTime()))
                 .build();
     }

@@ -11,7 +11,8 @@ import java.sql.Timestamp;
 @ToString
 @Builder
 @Value
-public class ProcessedAddress {
+public class ProcessedAddress implements Address {
+
     Long id;
     InetAddress address;
     AddressCountryDetails countryDetails;

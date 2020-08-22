@@ -5,7 +5,7 @@ import java.util.Queue;
 
 public interface AddressRepository {
 
-    void update(final Queue<ProcessedAddress> processedAddresses);
+    void updateDetails(final Queue<Address> addresses);
 
     List<UnprocessedAddress> getUnprocessedAddresses(int limit);
 }

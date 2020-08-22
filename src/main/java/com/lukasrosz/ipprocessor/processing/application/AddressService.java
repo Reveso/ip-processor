@@ -1,7 +1,7 @@
 package com.lukasrosz.ipprocessor.processing.application;
 
+import com.lukasrosz.ipprocessor.processing.model.Address;
 import com.lukasrosz.ipprocessor.processing.model.AddressRepository;
-import com.lukasrosz.ipprocessor.processing.model.ProcessedAddress;
 import com.lukasrosz.ipprocessor.processing.model.UnprocessedAddress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +16,8 @@ public class AddressService {
 
 
     @Transactional
-    public void update(final Queue<ProcessedAddress> ipAddressesIds) {
-        addressRepository.update(ipAddressesIds);
+    public void update(final Queue<Address> ipAddressesIds) {
+        addressRepository.updateDetails(ipAddressesIds);
     }
 
     @Transactional

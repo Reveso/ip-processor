@@ -1,6 +1,7 @@
 package com.lukasrosz.ipprocessor.model;
 
 import com.lukasrosz.ipprocessor.processing.model.AddressCountryDetails;
+import com.lukasrosz.ipprocessor.processing.model.NotFoundAddress;
 import com.lukasrosz.ipprocessor.processing.model.ProcessedAddress;
 import com.lukasrosz.ipprocessor.processing.model.UnprocessedAddress;
 import lombok.val;
@@ -52,5 +53,21 @@ class UnprocessedAddressTest {
                 .build();
         assertThat(processedAddress.getProcessedDate()).isCloseTo(new Date(), 1000 * 60);
         assertEquals(expectedProcessedAddress, processedAddress);
+    }
+
+    @Test
+    void shouldCreateNotFoundAddress() throws UnknownHostException {
+        val inetAddress = InetAddress.getByName("125.13.255.151");
+        val unprocessedAddress = new UnprocessedAddress(1L, inetAddress);
+
+        NotFoundAddress notFoundAddress = unprocessedAddress.notFound();
+
+        NotFoundAddress expectedNotFoundAddress = NotFoundAddress.builder()
+                .id(unprocessedAddress.getId())
+                .address(unprocessedAddress.getAddress())
+                .processedDate(notFoundAddress.getProcessedDate())
+                .build();
+        assertThat(notFoundAddress.getProcessedDate()).isCloseTo(new Date(), 1000 * 60);
+        assertEquals(expectedNotFoundAddress, notFoundAddress);
     }
 }
