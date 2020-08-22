@@ -38,9 +38,14 @@ public class AddressProcessor {
         unprocessedAddresses.parallelStream().forEach(unprocessedAddress -> {
             rateLimiter.acquire();
             ipCountryInfoApi.getIpCountryInfo(unprocessedAddress.getAddress()).ifPresent(ipCountryInfo -> {
-                        val processedAddress = unprocessedAddress.process(fromIpCountryInfo(ipCountryInfo));
-                        log.info("Adding to update list: {}", processedAddress);
-                        processedAddresses.add(processedAddress);
+                        try {
+                            val processedAddress = unprocessedAddress.process(fromIpCountryInfo(ipCountryInfo));
+                            log.info("Adding to update list: {}", processedAddress);
+                            processedAddresses.add(processedAddress);
+                        } catch (IllegalArgumentException | NullPointerException exception) {
+                            log.warn("Failed to get country details for address {}, reason {}",
+                                    unprocessedAddress.getAddress().getHostName(), exception);
+                        }
                     }
             );
         });

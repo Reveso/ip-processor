@@ -1,8 +1,10 @@
 package com.lukasrosz.ipprocessor.processing.model;
 
+import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
+import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -10,13 +12,17 @@ import java.util.Date;
 @Value
 public class UnprocessedAddress {
     Long id;
-    String address;
+    InetAddress address;
 
-    public ProcessedAddress process(AddressCountryDetails countryDetails) {
+    public UnprocessedAddress(@NonNull Long id, @NonNull InetAddress address) {
+        this.id = id;
+        this.address = address;
+    }
+
+    public ProcessedAddress process(@NonNull AddressCountryDetails countryDetails) {
         return ProcessedAddress.builder()
                 .id(this.id)
                 .address(this.address)
-                .processed(true)
                 .countryDetails(countryDetails)
                 .processedDate(new Timestamp(new Date().getTime()))
                 .build();

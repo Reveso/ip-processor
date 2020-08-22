@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.InetAddress;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class IpCountryInfoApi implements CountryInfoRepository {
 
     private final String apiUrl;
 
-    public Optional<IpCountryInfo> getIpCountryInfo(String ipAddress) {
+    public Optional<IpCountryInfo> getIpCountryInfo(InetAddress ipAddress) {
         RestTemplate restTemplate = new RestTemplate();
         String requestUrl = getUrlForIp(ipAddress);
 
@@ -28,8 +29,8 @@ public class IpCountryInfoApi implements CountryInfoRepository {
                 Optional.empty();
     }
 
-    private String getUrlForIp(String ipAddress) {
-        return apiUrl + ipAddress;
+    private String getUrlForIp(InetAddress ipAddress) {
+        return apiUrl + ipAddress.getHostAddress();
     }
 
 

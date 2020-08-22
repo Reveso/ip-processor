@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,13 +33,19 @@ public class AddressDatabaseRepository implements AddressRepository {
     }
 
     private RowMapper<UnprocessedAddress> getUnprocessedAddressRowMapper() {
-        return (resultSet, rowNum) -> new UnprocessedAddress(resultSet.getLong("id"), resultSet.getString("address"));
+        return (resultSet, rowNum) -> {
+            try {
+                return new UnprocessedAddress(resultSet.getLong("id"), InetAddress.getByName(resultSet.getString("address")));
+            } catch (UnknownHostException e) {
+                return null;
+            }
+        };
     }
 
     @Override
     public void update(final Queue<ProcessedAddress> processedAddressesIds) {
         jdbcTemplate.batchUpdate(
-                "update ip_address set address = ?, processed = ?, country_code = ?, country_code3 = ?, country_name = ?, country_emoji = ?, processed_date = ? where id = ?",
+                "update ip_address set address = ?, processed = 1, country_code = ?, country_code3 = ?, country_name = ?, country_emoji = ?, processed_date = ? where id = ?",
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement ps, int i)
                             throws SQLException {
@@ -46,14 +54,13 @@ public class AddressDatabaseRepository implements AddressRepository {
                         if (address == null) {
                             return;
                         }
-                        ps.setString(1, address.getAddress());
-                        ps.setBoolean(2, address.getProcessed());
-                        ps.setString(3, address.getCountryDetails().getCountryCode());
-                        ps.setString(4, address.getCountryDetails().getCountryCode3());
-                        ps.setString(5, address.getCountryDetails().getCountryName());
-                        ps.setString(6, address.getCountryDetails().getCountryEmoji());
-                        ps.setTimestamp(7, address.getProcessedDate());
-                        ps.setLong(8, address.getId());
+                        ps.setString(1, address.getAddress().getHostAddress());
+                        ps.setString(2, address.getCountryDetails().getCountryCode());
+                        ps.setString(3, address.getCountryDetails().getCountryCode3());
+                        ps.setString(4, address.getCountryDetails().getCountryName());
+                        ps.setString(5, address.getCountryDetails().getCountryEmoji());
+                        ps.setTimestamp(6, address.getProcessedDate());
+                        ps.setLong(7, address.getId());
                     }
 
                     public int getBatchSize() {
